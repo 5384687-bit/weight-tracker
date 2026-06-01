@@ -114,8 +114,9 @@ export async function pushToCloud(): Promise<void> {
     catch { return []; }
   };
 
-  // Push profiles
+  // Push profiles (and delete removed ones)
   const profiles = getLocal<Record<string, unknown>>('profiles');
+  const localProfileIds = profiles.map(p => p.id as string).filter(Boolean);
   for (const p of profiles) {
     await supabase.from('profiles').upsert({
       id: p.id, user_id: user.id, name: p.name, gender: p.gender,
@@ -125,11 +126,32 @@ export async function pushToCloud(): Promise<void> {
       birth_date: p.birthDate || null, activity_level: p.activityLevel || null,
     });
   }
+  // Delete profiles from cloud that no longer exist locally
+  const { data: cloudProfiles } = await supabase.from('profiles').select('id').eq('user_id', user.id);
+  if (cloudProfiles) {
+    for (const cp of cloudProfiles) {
+      if (!localProfileIds.includes(cp.id)) {
+        await supabase.from('profiles').delete().eq('id', cp.id);
+      }
+    }
+  }
 
   // Push active profile
   const activeId = JSON.parse(localStorage.getItem('active_profile_id') || 'null');
   if (activeId) {
     await supabase.from('user_settings').upsert({ user_id: user.id, active_profile_id: activeId });
+  }
+
+  // Helper: sync deletions for a table
+  async function syncDeletions(table: string, localIds: string[]) {
+    const { data: cloud } = await supabase.from(table).select('id').eq('user_id', user!.id);
+    if (cloud) {
+      for (const row of cloud) {
+        if (!localIds.includes(row.id)) {
+          await supabase.from(table).delete().eq('id', row.id);
+        }
+      }
+    }
   }
 
   // Push weight entries
@@ -140,6 +162,7 @@ export async function pushToCloud(): Promise<void> {
       date: w.date, weight: w.weight,
     });
   }
+  await syncDeletions('weight_entries', weights.map(w => w.id as string).filter(Boolean));
 
   // Push food entries
   const foods = getLocal<Record<string, unknown>>('food_entries');
@@ -151,6 +174,7 @@ export async function pushToCloud(): Promise<void> {
       fat: f.fat ?? null, carbs: f.carbs ?? null,
     });
   }
+  await syncDeletions('food_entries', foods.map(f => f.id as string).filter(Boolean));
 
   // Push exercise entries
   const exercises = getLocal<Record<string, unknown>>('exercise_entries');
@@ -161,6 +185,7 @@ export async function pushToCloud(): Promise<void> {
       calories_burned: e.caloriesBurned ?? null, notes: e.notes ?? null,
     });
   }
+  await syncDeletions('exercise_entries', exercises.map(e => e.id as string).filter(Boolean));
 
   // Push water entries
   const water = getLocal<Record<string, unknown>>('water_entries');
@@ -191,6 +216,7 @@ export async function pushToCloud(): Promise<void> {
       thigh_left: m.thighLeft ?? null, neck: m.neck ?? null,
     });
   }
+  await syncDeletions('measurement_entries', measurements.map(m => m.id as string).filter(Boolean));
 
   // Push meal presets
   const mealPresets = getLocal<Record<string, unknown>>('meal_presets');

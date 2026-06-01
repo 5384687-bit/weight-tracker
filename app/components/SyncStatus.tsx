@@ -14,8 +14,8 @@ export default function SyncStatus() {
     if (!user || syncing) return;
     setSyncing(true);
     try {
-      await pushToCloud();
       await pullFromCloud();
+      await pushToCloud();
       setLastSync(new Date().toLocaleTimeString('he-IL'));
     } catch (err) {
       console.error('Sync error:', err);

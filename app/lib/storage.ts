@@ -1,4 +1,5 @@
 import { WeightEntry, FoodEntry, ExerciseEntry, WaterEntry, WaterPreset, UserProfile, MeasurementEntry, MealPreset } from './types';
+import { supabase } from './supabase';
 
 function getItem<T>(key: string, fallback: T): T {
   if (typeof window === 'undefined') return fallback;
@@ -33,6 +34,8 @@ export function deleteProfile(id: string): void {
   setItem('measurement_entries', getMeasurementEntries().filter(e => e.profileId !== id));
   const active = getActiveProfileId();
   if (active === id) setItem('active_profile_id', null);
+  // Also delete from Supabase
+  supabase.from('profiles').delete().eq('id', id).then(() => {});
 }
 
 export function getActiveProfileId(): string | null {
