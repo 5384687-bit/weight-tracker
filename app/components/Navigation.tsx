@@ -17,6 +17,7 @@ import {
   CalendarDays,
   Ruler,
   Trophy,
+  Heart,
 } from 'lucide-react';
 import ProfileSwitcher from './ProfileSwitcher';
 
@@ -30,6 +31,7 @@ const navItems = [
   { href: '/measurements', label: 'היקפים', icon: Ruler },
   { href: '/stats', label: 'סטטיסטיקות', icon: BarChart3 },
   { href: '/competition', label: 'תחרות', icon: Trophy },
+  { href: '/family', label: 'משפחה', icon: Heart },
   { href: '/exercises-library', label: 'ספריית תרגילים', icon: BookOpen },
   { href: '/profiles', label: 'פרופילים', icon: Users },
 ];
