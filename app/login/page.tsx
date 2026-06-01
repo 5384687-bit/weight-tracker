@@ -38,8 +38,10 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
-      // After login, pull cloud data to local
-      setSyncMessage('מוריד נתונים...');
+      // First push any existing local data to cloud, then pull
+      setSyncMessage('מעלה נתונים מקומיים...');
+      await pushToCloud();
+      setSyncMessage('מוריד נתונים מהענן...');
       await pullFromCloud();
     }
 

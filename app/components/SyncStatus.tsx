@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Cloud, CloudOff, RefreshCw, LogOut } from 'lucide-react';
 import { useAuth } from '../lib/auth-context';
-import { pushToCloud } from '../lib/sync';
+import { pushToCloud, pullFromCloud } from '../lib/sync';
 
 export default function SyncStatus() {
   const { user, signOut } = useAuth();
@@ -15,6 +15,7 @@ export default function SyncStatus() {
     setSyncing(true);
     try {
       await pushToCloud();
+      await pullFromCloud();
       setLastSync(new Date().toLocaleTimeString('he-IL'));
     } catch (err) {
       console.error('Sync error:', err);
