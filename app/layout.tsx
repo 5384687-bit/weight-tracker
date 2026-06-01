@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navigation from "./components/Navigation";
@@ -16,17 +16,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#16a34a",
+};
+
 export const metadata: Metadata = {
   title: "מעקב משקל - הדרך לגרסה הטובה שלך",
   description: "אפליקציה למעקב משקל, תזונה וכושר",
   manifest: "/manifest.json",
-  themeColor: "#16a34a",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "מעקב משקל",
   },
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
 };
 
 export default function RootLayout({

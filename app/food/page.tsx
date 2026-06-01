@@ -402,9 +402,9 @@ export default function FoodPage() {
       id: generateId(), profileId, date: selectedDate, meal,
       description: `${food.emoji} ${food.name} (${food.portion})`,
       calories: food.calories,
-      protein: (food as Record<string, unknown>).protein as number | undefined,
-      fat: (food as Record<string, unknown>).fat as number | undefined,
-      carbs: (food as Record<string, unknown>).carbs as number | undefined,
+      protein: food.protein,
+      fat: food.fat,
+      carbs: food.carbs,
     };
     saveFoodEntry(entry);
     setEntries(getFoodEntries(profileId));
