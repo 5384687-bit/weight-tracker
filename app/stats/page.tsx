@@ -62,13 +62,13 @@ function TimeRangePicker({ value, onChange }: { value: TimeRange; onChange: (v: 
         <button key={opt.value} onClick={() => onChange(opt.value)}
           className="px-2.5 py-1 rounded-lg text-xs transition-all duration-200"
           style={value === opt.value ? {
-            background: 'linear-gradient(135deg, rgba(212, 168, 67, 0.2), rgba(139, 92, 246, 0.2))',
-            border: '1px solid rgba(212, 168, 67, 0.3)',
-            color: '#d4a843',
+            background: 'rgba(167, 139, 250, 0.1)',
+            border: '1px solid rgba(167, 139, 250, 0.2)',
+            color: 'var(--accent-warm)',
           } : {
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            color: 'rgba(255,255,255,0.4)',
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid var(--border-subtle)',
+            color: 'var(--text-tertiary)',
           }}>
           {opt.label}
         </button>
@@ -84,13 +84,13 @@ function ChartTypePicker({ value, onChange }: { value: ChartType; onChange: (v: 
         <button key={t} onClick={() => onChange(t)}
           className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs transition-all duration-200"
           style={value === t ? {
-            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(139, 92, 246, 0.15))',
-            border: '1px solid rgba(139, 92, 246, 0.3)',
-            color: '#a78bfa',
+            background: 'rgba(167, 139, 250, 0.1)',
+            border: '1px solid rgba(167, 139, 250, 0.2)',
+            color: 'var(--accent)',
           } : {
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            color: 'rgba(255,255,255,0.4)',
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid var(--border-subtle)',
+            color: 'var(--text-tertiary)',
           }}>
           {chartTypeLabels[t].icon} {chartTypeLabels[t].label}
         </button>
@@ -148,7 +148,7 @@ function FlexChart({ type, data, dataKeys, colors, names, height = 300, yDomain,
             return (
               <div className="rounded-xl p-2.5 shadow-xl text-sm" dir="rtl"
                 style={{ background: 'rgba(15,15,35,0.95)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
-                <p className="font-bold mb-1 gold-text">{label}</p>
+                <p className="font-bold mb-1 text-gradient">{label}</p>
                 {dataKeys.map((k, i) => {
                   const o = d[`${k}_open`]; const c = d[`${k}_close`];
                   const h = d[`${k}_high`]; const l = d[`${k}_low`];
@@ -289,7 +289,7 @@ function CandleChart({ data, height = 300, referenceLine }: {
           return (
             <div className="rounded-xl p-2.5 shadow-xl text-sm" dir="rtl"
               style={{ background: 'rgba(15,15,35,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <p className="font-bold mb-1 gold-text">{label}</p>
+              <p className="font-bold mb-1 text-gradient">{label}</p>
               <p style={{ color: 'rgba(255,255,255,0.6)' }}>פתיחה: {d.open} ק&quot;ג</p>
               <p style={{ color: 'rgba(255,255,255,0.6)' }}>גבוה: {d.high} ק&quot;ג</p>
               <p style={{ color: 'rgba(255,255,255,0.6)' }}>נמוך: {d.low} ק&quot;ג</p>
@@ -381,7 +381,7 @@ export default function StatsPage() {
         <h1 className="text-3xl font-bold flex items-center gap-3 mb-6" style={{ color: 'rgba(255,255,255,0.9)' }}>
           <BarChart3 className="text-orange-400" /> סטטיסטיקות
         </h1>
-        <div className="glass-card p-8 text-center">
+        <div className="card-static p-8 text-center">
           <p className="text-lg mb-3" style={{ color: '#d4a843' }}>צור פרופיל קודם</p>
           <Link href="/profiles" className="inline-block btn-gold px-6 py-2.5 rounded-xl">צור פרופיל</Link>
         </div>
@@ -467,7 +467,7 @@ export default function StatsPage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4 animate-slide-up">
+      <div className="flex items-center justify-between flex-wrap gap-4 enter">
         <h1 className="text-3xl font-bold flex items-center gap-3">
           <div className="p-2 rounded-xl" style={{ background: 'rgba(249, 115, 22, 0.15)' }}>
             <BarChart3 className="text-orange-400" size={24} />
@@ -476,29 +476,29 @@ export default function StatsPage() {
         </h1>
       </div>
 
-      <div className="glass-card-static p-3 animate-slide-up" style={{ animationDelay: '50ms' }}>
+      <div className="card-static p-3 enter" style={{ animationDelay: '50ms' }}>
         <TimeRangePicker value={timeRange} onChange={setTimeRange} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="glass-card-static p-5 text-center animate-slide-up" style={{ animationDelay: '100ms' }}>
+        <div className="card-static p-5 text-center enter" style={{ animationDelay: '100ms' }}>
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>{"סה\"כ דקות אימון"}</p>
-          <p className="text-3xl font-bold stat-number" style={{ color: '#a78bfa' }}>{totalExerciseMinutes}</p>
+          <p className="text-3xl font-bold font-semibold" style={{ color: '#a78bfa' }}>{totalExerciseMinutes}</p>
         </div>
-        <div className="glass-card-static p-5 text-center animate-slide-up" style={{ animationDelay: '150ms' }}>
+        <div className="card-static p-5 text-center enter" style={{ animationDelay: '150ms' }}>
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>ממוצע קלוריות יומי</p>
-          <p className="text-3xl font-bold stat-number" style={{ color: '#fb923c' }}>{avgDailyCalories}</p>
+          <p className="text-3xl font-bold font-semibold" style={{ color: '#fb923c' }}>{avgDailyCalories}</p>
         </div>
-        <div className="glass-card-static p-5 text-center animate-slide-up" style={{ animationDelay: '200ms' }}>
+        <div className="card-static p-5 text-center enter" style={{ animationDelay: '200ms' }}>
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>ירידה כוללת</p>
-          <p className={`text-3xl font-bold stat-number ${weightLost > 0 ? 'text-emerald-400' : ''}`} style={weightLost <= 0 ? { color: 'rgba(255,255,255,0.5)' } : {}}>
+          <p className={`text-3xl font-bold font-semibold ${weightLost > 0 ? 'text-emerald-400' : ''}`} style={weightLost <= 0 ? { color: 'rgba(255,255,255,0.5)' } : {}}>
             {weightLost > 0 ? weightLost.toFixed(1) : '0'} {"ק\"ג"}
           </p>
         </div>
       </div>
 
       {weightChartData.length > 1 && (
-        <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '250ms' }}>
+        <div className="card-static p-6 enter" style={{ animationDelay: '250ms' }}>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <h2 className="font-bold text-lg" style={{ color: 'rgba(255,255,255,0.9)' }}>מגמת משקל</h2>
             <ChartTypePicker value={weightChartType} onChange={setWeightChartType} />
@@ -523,7 +523,7 @@ export default function StatsPage() {
       )}
 
       {calorieData.length > 0 && (
-        <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '300ms' }}>
+        <div className="card-static p-6 enter" style={{ animationDelay: '300ms' }}>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <h2 className="font-bold text-lg" style={{ color: 'rgba(255,255,255,0.9)' }}>קלוריות - צריכה מול שריפה</h2>
             <ChartTypePicker value={calorieChartType} onChange={setCalorieChartType} />
@@ -539,7 +539,7 @@ export default function StatsPage() {
       )}
 
       {exerciseData.length > 0 && (
-        <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '350ms' }}>
+        <div className="card-static p-6 enter" style={{ animationDelay: '350ms' }}>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <h2 className="font-bold text-lg" style={{ color: 'rgba(255,255,255,0.9)' }}>דקות אימון ביום</h2>
             <ChartTypePicker value={exerciseChartType} onChange={setExerciseChartType} />
@@ -556,7 +556,7 @@ export default function StatsPage() {
       )}
 
       {weeklyWeightData.length > 1 && (
-        <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '400ms' }}>
+        <div className="card-static p-6 enter" style={{ animationDelay: '400ms' }}>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <h2 className="font-bold text-lg" style={{ color: 'rgba(255,255,255,0.9)' }}>ירידה שבועית במשקל</h2>
             <ChartTypePicker value={weeklyChartType} onChange={setWeeklyChartType} />
@@ -577,7 +577,7 @@ export default function StatsPage() {
       )}
 
       {weeklyWeightData.length > 0 && (
-        <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '450ms' }}>
+        <div className="card-static p-6 enter" style={{ animationDelay: '450ms' }}>
           <h2 className="font-bold text-lg mb-4" style={{ color: 'rgba(255,255,255,0.9)' }}>טבלת משקל שבועית</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -593,7 +593,7 @@ export default function StatsPage() {
                 {weeklyWeightData.map((row, i) => (
                   <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }} className="hover:bg-white/[0.02]">
                     <td className="py-2.5 px-3 font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>{row.week}</td>
-                    <td className="py-2.5 px-3 text-center font-bold gold-text">{row.avgWeight}</td>
+                    <td className="py-2.5 px-3 text-center font-bold text-gradient">{row.avgWeight}</td>
                     <td className={`py-2.5 px-3 text-center font-semibold ${row.weeklyChange < 0 ? 'text-emerald-400' : row.weeklyChange > 0 ? 'text-red-400' : ''}`}
                       style={row.weeklyChange === 0 ? { color: 'rgba(255,255,255,0.3)' } : {}}>
                       {row.weeklyChange === 0 ? '-' : `${row.weeklyChange > 0 ? '+' : ''}${row.weeklyChange}`}
@@ -611,7 +611,7 @@ export default function StatsPage() {
       )}
 
       {measurementChartData.length > 1 && (
-        <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '500ms' }}>
+        <div className="card-static p-6 enter" style={{ animationDelay: '500ms' }}>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <h2 className="font-bold text-lg flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.9)' }}>
               <Ruler className="text-pink-400" size={20} /> מגמת היקפים

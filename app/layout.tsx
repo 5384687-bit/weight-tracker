@@ -6,6 +6,7 @@ import { AuthProvider } from "./lib/auth-context";
 import AuthGuard from "./components/AuthGuard";
 import SyncStatus from "./components/SyncStatus";
 import AnimatedBackground from "./components/AnimatedBackground";
+import PageTransition from "./components/PageTransition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,11 +23,11 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#0a0a1a",
+  themeColor: "#08080f",
 };
 
 export const metadata: Metadata = {
-  title: "מעקב משקל - Premium",
+  title: "מעקב משקל",
   description: "אפליקציה למעקב משקל, תזונה וכושר",
   manifest: "/manifest.json",
   appleWebApp: {
@@ -49,7 +50,9 @@ export default function RootLayout({
           <AuthGuard>
             <Navigation />
             <SyncStatus />
-            <main className="flex-1 md:mr-64 p-4 md:p-8 relative z-10">{children}</main>
+            <main className="flex-1 md:mr-64 p-4 md:p-8 relative z-10">
+              <PageTransition>{children}</PageTransition>
+            </main>
           </AuthGuard>
         </AuthProvider>
       </body>

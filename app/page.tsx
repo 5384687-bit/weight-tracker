@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Scale, UtensilsCrossed, Dumbbell, Droplets, TrendingDown, Trophy, Flame, Target, Crown, Bell, Sparkles } from 'lucide-react';
+import { Scale, UtensilsCrossed, Dumbbell, Droplets, TrendingDown, Trophy, Flame, Target, Crown, Bell } from 'lucide-react';
 import { getWeightEntries, getFoodEntries, getExerciseEntries, getWaterEntries, getActiveProfile, getActiveProfileId, getProfiles } from './lib/storage';
 import { WeightEntry, FoodEntry, ExerciseEntry, UserProfile } from './lib/types';
 import { getDailyTip } from './lib/tips';
@@ -59,7 +59,6 @@ export default function Dashboard() {
   const weightChange = latestWeight && previousWeight ? latestWeight.weight - previousWeight.weight : 0;
   const totalLost = profile && latestWeight ? profile.startWeight - latestWeight.weight : 0;
   const remainingToGoal = profile && latestWeight ? latestWeight.weight - profile.targetWeight : 0;
-
   const streakDays = calculateStreak(foods, exercises);
 
   function calculateStreak(foods: FoodEntry[], exercises: ExerciseEntry[]): number {
@@ -77,71 +76,73 @@ export default function Dashboard() {
 
   const bmi = profile && latestWeight ? calculateBMI(latestWeight.weight, profile.height) : 0;
   const bmiInfo = profile ? getBMICategory(bmi, profile.gender) : { label: '', color: '' };
-
   const daysToTarget = profile ? Math.ceil((new Date(profile.targetDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0;
 
-  const categoryStyles: Record<string, string> = {
-    nutrition: 'border-emerald-500/20 bg-emerald-500/5',
-    exercise: 'border-blue-500/20 bg-blue-500/5',
-    mindset: 'border-purple-500/20 bg-purple-500/5',
-    habit: 'border-amber-500/20 bg-amber-500/5',
+  const tipCategoryColors: Record<string, string> = {
+    nutrition: 'rgba(52, 211, 153, 0.08)',
+    exercise: 'rgba(96, 165, 250, 0.08)',
+    mindset: 'rgba(167, 139, 250, 0.08)',
+    habit: 'rgba(251, 146, 60, 0.08)',
+  };
+  const tipCategoryBorders: Record<string, string> = {
+    nutrition: 'rgba(52, 211, 153, 0.12)',
+    exercise: 'rgba(96, 165, 250, 0.12)',
+    mindset: 'rgba(167, 139, 250, 0.12)',
+    habit: 'rgba(251, 146, 60, 0.12)',
   };
   const categoryNames: Record<string, string> = {
     nutrition: 'תזונה', exercise: 'כושר', mindset: 'מיינדסט', habit: 'הרגלים',
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div className="animate-slide-up">
-        <h1 className="text-3xl font-bold">
-          <span style={{ color: 'rgba(255,255,255,0.9)' }}>שלום</span>
-          {profile?.name && <span className="gold-text"> {profile.name}</span>}
-          <span style={{ color: 'rgba(255,255,255,0.9)' }}> </span>
-          <Sparkles className="inline text-yellow-400 mb-1" size={24} />
+    <div className="max-w-6xl mx-auto space-y-5">
+      {/* Header */}
+      <div className="enter">
+        <h1 className="text-2xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+          שלום{profile?.name ? <span className="text-gradient"> {profile.name}</span> : ''}
         </h1>
-        <p className="text-sm mt-1" style={{ color: 'rgba(139, 92, 246, 0.7)' }}>{toHebrewDate(today)}</p>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--text-tertiary)' }}>{toHebrewDate(today)}</p>
       </div>
 
       {!profile && (
-        <div className="glass-card p-6 text-center animate-slide-up" style={{ animationDelay: '100ms' }}>
-          <p className="text-lg mb-3" style={{ color: '#d4a843' }}>צור פרופיל כדי להתחיל!</p>
-          <Link href="/profiles" className="inline-block btn-gold px-6 py-2.5 rounded-xl">
-            צור פרופיל
-          </Link>
+        <div className="card-static p-6 text-center enter" style={{ animationDelay: '80ms' }}>
+          <p className="text-lg mb-3" style={{ color: 'var(--accent-warm)' }}>צור פרופיל כדי להתחיל</p>
+          <Link href="/profiles" className="inline-block btn-warm px-6 py-2.5 rounded-xl">צור פרופיל</Link>
         </div>
       )}
 
-      <div className={`glass-card-static p-4 border animate-slide-up ${categoryStyles[tip.category]}`} style={{ animationDelay: '150ms' }}>
-        <p className="font-semibold text-sm mb-1" style={{ color: '#d4a843' }}>
-          <Sparkles className="inline mb-0.5 ml-1" size={14} />
-          טיפ יומי - {categoryNames[tip.category]}
-        </p>
-        <p style={{ color: 'rgba(255,255,255,0.75)' }}>{tip.text}</p>
+      {/* Daily tip */}
+      <div className="card-static p-4 enter" style={{ animationDelay: '100ms', background: tipCategoryColors[tip.category], borderColor: tipCategoryBorders[tip.category] }}>
+        <p className="text-xs font-medium mb-1" style={{ color: 'var(--accent-warm)' }}>טיפ יומי · {categoryNames[tip.category]}</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{tip.text}</p>
       </div>
 
+      {/* Reminders */}
       {profile && (() => {
         const reminders: { text: string; icon: string; href: string }[] = [];
         const isFriday = new Date().getDay() === 5;
         const todayWeight = weights.find(w => w.date === today);
-        if (isFriday && !todayWeight) reminders.push({ text: 'היום יום שישי - הגיע הזמן להישקל!', icon: '⚖️', href: '/weight' });
+        if (isFriday && !todayWeight) reminders.push({ text: 'היום יום שישי - הגיע הזמן להישקל', icon: '⚖️', href: '/weight' });
         if (todayFoods.length === 0) reminders.push({ text: 'עדיין לא תיעדת ארוחות היום', icon: '🍽️', href: '/food' });
-        if (todayWater < 4) reminders.push({ text: `שתית רק ${todayWater} כוסות מים - נסה להגיע ל-8!`, icon: '💧', href: '/water' });
-        if (todayExercises.length === 0) reminders.push({ text: 'עוד לא התאמנת היום - בוא נזיז את הגוף!', icon: '💪', href: '/exercise' });
+        if (todayWater < 4) reminders.push({ text: `שתית רק ${todayWater} כוסות מים`, icon: '💧', href: '/water' });
+        if (todayExercises.length === 0) reminders.push({ text: 'עוד לא התאמנת היום', icon: '💪', href: '/exercise' });
         if (reminders.length === 0) return null;
         return (
-          <div className="space-y-2 animate-slide-up" style={{ animationDelay: '200ms' }}>
-            <div className="flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              <Bell size={16} /> <span className="text-sm font-medium">תזכורות להיום</span>
+          <div className="space-y-1.5 enter" style={{ animationDelay: '140ms' }}>
+            <div className="flex items-center gap-1.5 px-1" style={{ color: 'var(--text-tertiary)' }}>
+              <Bell size={13} />
+              <span className="text-xs">תזכורות</span>
             </div>
             {reminders.map((r, i) => (
-              <Link key={i} href={r.href} className="block glass-card p-3 hover:border-purple-500/30 transition-all">
-                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>{r.icon} {r.text}</span>
+              <Link key={i} href={r.href} className="card card-interactive block p-3">
+                <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{r.icon} {r.text}</span>
               </Link>
             ))}
           </div>
         );
       })()}
 
+      {/* Calorie budget */}
       {profile && profile.birthDate && profile.activityLevel && (() => {
         const age = calculateAge(profile.birthDate);
         const currentWeight = latestWeight?.weight || profile.startWeight;
@@ -151,154 +152,116 @@ export default function Dashboard() {
         const net = todayCaloriesIn - todayCaloriesBurned;
         const overBudget = net > target;
         return (
-          <div className="glass-card-static p-5 animate-slide-up" style={{ animationDelay: '250ms' }}>
+          <div className="card-static p-5 enter" style={{ animationDelay: '180ms' }}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg" style={{ background: 'rgba(249, 115, 22, 0.15)' }}>
-                  <Flame className="text-orange-400" size={20} />
-                </div>
-                <h3 className="font-bold" style={{ color: 'rgba(255,255,255,0.9)' }}>תקציב קלוריות יומי</h3>
+                <Flame size={18} style={{ color: '#fb923c' }} />
+                <h3 className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>תקציב קלוריות</h3>
               </div>
-              <div className="text-left">
-                <span className={`text-2xl font-bold ${overBudget ? 'text-red-400' : 'text-emerald-400'}`}>{todayCaloriesIn}</span>
-                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}> / {target}</span>
+              <div>
+                <span className={`text-xl font-semibold ${overBudget ? 'text-red-400' : 'text-emerald-400'}`}>{todayCaloriesIn}</span>
+                <span className="text-sm" style={{ color: 'var(--text-tertiary)' }}> / {target}</span>
               </div>
             </div>
-            <div className="w-full rounded-full h-3 overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
-              <div className={`h-3 rounded-full transition-all progress-shimmer ${overBudget ? 'bg-red-500' : pct > 80 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+            <div className="progress-bar h-2">
+              <div className={`progress-fill h-2 ${overBudget ? 'bg-red-500' : pct > 80 ? 'bg-amber-500' : 'bg-emerald-500'}`}
                 style={{ width: `${Math.min(100, pct)}%` }} />
             </div>
-            <div className="flex justify-between text-xs mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              <span>TDEE: {tdee} | יעד לירידה: {target}</span>
-              <span>{todayCaloriesBurned > 0 && `שרפת ${todayCaloriesBurned} | `}נשאר: {Math.max(0, target - net)}</span>
+            <div className="flex justify-between text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>
+              <span>TDEE: {tdee} · יעד: {target}</span>
+              <span>{todayCaloriesBurned > 0 && `שרפת ${todayCaloriesBurned} · `}נשאר: {Math.max(0, target - net)}</span>
             </div>
           </div>
         );
       })()}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          icon={<Scale className="text-blue-400" size={20} />}
-          iconBg="rgba(59, 130, 246, 0.15)"
-          title="משקל נוכחי"
-          value={latestWeight ? `${latestWeight.weight} ק"ג` : '--'}
-          subtitle={weightChange !== 0 ? `${weightChange > 0 ? '+' : ''}${weightChange.toFixed(1)} מהשקילה הקודמת` : ''}
-          subtitleColor={weightChange <= 0 ? '#34d399' : '#f87171'}
-          href="/weight"
-          delay={300}
-        />
-        <StatCard
-          icon={<Flame className="text-orange-400" size={20} />}
-          iconBg="rgba(249, 115, 22, 0.15)"
-          title="קלוריות היום"
-          value={`${todayCaloriesIn}`}
-          subtitle={todayCaloriesBurned > 0 ? `${todayCaloriesBurned} נשרפו` : 'עדיין לא אכלת היום'}
-          href="/food"
-          delay={350}
-        />
-        <StatCard
-          icon={<Dumbbell className="text-purple-400" size={20} />}
-          iconBg="rgba(168, 85, 247, 0.15)"
-          title="אימון היום"
-          value={`${todayExerciseMinutes} דק'`}
-          subtitle={todayExercises.length > 0 ? `${todayExercises.length} אימונים` : 'בוא להתאמן!'}
-          href="/exercise"
-          delay={400}
-        />
-        <StatCard
-          icon={<Droplets className="text-cyan-400" size={20} />}
-          iconBg="rgba(34, 211, 238, 0.15)"
-          title="מים היום"
-          value={`${todayWater} כוסות`}
-          subtitle={todayWater >= 8 ? 'מצוין! הגעת ליעד!' : `חסרות ${8 - todayWater} כוסות`}
-          subtitleColor={todayWater >= 8 ? '#34d399' : '#fb923c'}
-          href="/water"
-          delay={450}
-        />
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { icon: <Scale size={18} />, iconColor: '#60a5fa', title: 'משקל', value: latestWeight ? `${latestWeight.weight}` : '--', unit: 'ק"ג', sub: weightChange !== 0 ? `${weightChange > 0 ? '+' : ''}${weightChange.toFixed(1)}` : '', subColor: weightChange <= 0 ? '#34d399' : '#f87171', href: '/weight', delay: 200 },
+          { icon: <Flame size={18} />, iconColor: '#fb923c', title: 'קלוריות', value: `${todayCaloriesIn}`, unit: '', sub: todayCaloriesBurned > 0 ? `${todayCaloriesBurned} נשרפו` : '', subColor: '', href: '/food', delay: 240 },
+          { icon: <Dumbbell size={18} />, iconColor: '#a78bfa', title: 'אימון', value: `${todayExerciseMinutes}`, unit: "דק'", sub: todayExercises.length > 0 ? `${todayExercises.length} אימונים` : '', subColor: '', href: '/exercise', delay: 280 },
+          { icon: <Droplets size={18} />, iconColor: '#22d3ee', title: 'מים', value: `${todayWater}`, unit: 'כוסות', sub: todayWater >= 8 ? 'הגעת ליעד' : `חסרות ${8 - todayWater}`, subColor: todayWater >= 8 ? '#34d399' : '#fb923c', href: '/water', delay: 320 },
+        ].map((s, i) => (
+          <Link key={i} href={s.href} className="card card-interactive p-4 enter" style={{ animationDelay: `${s.delay}ms` }}>
+            <div className="flex items-center gap-2 mb-2">
+              <div style={{ color: s.iconColor }}>{s.icon}</div>
+              <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{s.title}</span>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>{s.value}</span>
+              {s.unit && <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{s.unit}</span>}
+            </div>
+            {s.sub && <p className="text-xs mt-1" style={{ color: s.subColor || 'var(--text-tertiary)' }}>{s.sub}</p>}
+          </Link>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Three column section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* Progress */}
         {profile && latestWeight && (
-          <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '500ms' }}>
+          <div className="card-static p-5 enter" style={{ animationDelay: '360ms' }}>
             <div className="flex items-center gap-2 mb-4">
-              <div className="p-1.5 rounded-lg" style={{ background: 'rgba(59, 130, 246, 0.15)' }}>
-                <Target className="text-blue-400" size={20} />
-              </div>
-              <h3 className="font-bold text-lg" style={{ color: 'rgba(255,255,255,0.9)' }}>התקדמות ליעד</h3>
+              <Target size={16} style={{ color: '#60a5fa' }} />
+              <h3 className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>התקדמות ליעד</h3>
             </div>
             <div className="space-y-3">
               <div>
-                <div className="flex justify-between text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                  <span>יעד: {profile.targetWeight} ק&quot;ג</span>
-                  <span>התחלה: {profile.startWeight} ק&quot;ג</span>
+                <div className="flex justify-between text-xs mb-1.5" style={{ color: 'var(--text-tertiary)' }}>
+                  <span>{profile.targetWeight} ק&quot;ג</span>
+                  <span>{profile.startWeight} ק&quot;ג</span>
                 </div>
-                <div className="w-full rounded-full h-3 overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                  <div
-                    className="h-3 rounded-full transition-all progress-shimmer"
-                    style={{
-                      width: `${Math.min(100, Math.max(0, (totalLost / (profile.startWeight - profile.targetWeight)) * 100))}%`,
-                      background: 'linear-gradient(90deg, #8b5cf6, #d4a843)',
-                    }}
-                  />
+                <div className="progress-bar h-2">
+                  <div className="progress-fill h-2"
+                    style={{ width: `${Math.min(100, Math.max(0, (totalLost / (profile.startWeight - profile.targetWeight)) * 100))}%`, background: 'linear-gradient(90deg, var(--accent), var(--accent-warm))' }} />
                 </div>
-                <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                  ירדת {totalLost.toFixed(1)} ק&quot;ג | נשאר {remainingToGoal.toFixed(1)} ק&quot;ג
+                <p className="text-xs mt-1.5" style={{ color: 'var(--text-tertiary)' }}>
+                  ירדת {totalLost.toFixed(1)} · נשאר {remainingToGoal.toFixed(1)}
                 </p>
               </div>
-              <div className="text-center p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>BMI</p>
-                <p className="text-2xl font-bold gold-text stat-number">{bmi.toFixed(1)}</p>
-                <p className="text-sm" style={{ color: '#d4a843' }}>{bmiInfo.label}</p>
+              <div className="text-center p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-subtle)' }}>
+                <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>BMI</p>
+                <p className="text-2xl font-semibold text-gradient">{bmi.toFixed(1)}</p>
+                <p className="text-xs" style={{ color: 'var(--accent-warm)' }}>{bmiInfo.label}</p>
               </div>
               {daysToTarget > 0 && (
-                <p className="text-center text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  {daysToTarget} ימים עד תאריך היעד
-                </p>
+                <p className="text-center text-xs" style={{ color: 'var(--text-tertiary)' }}>{daysToTarget} ימים עד היעד</p>
               )}
             </div>
           </div>
         )}
 
-        <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '550ms' }}>
+        {/* Achievements */}
+        <div className="card-static p-5 enter" style={{ animationDelay: '400ms' }}>
           <div className="flex items-center gap-2 mb-4">
-            <div className="p-1.5 rounded-lg" style={{ background: 'rgba(234, 179, 8, 0.15)' }}>
-              <Trophy className="text-yellow-400" size={20} />
-            </div>
-            <h3 className="font-bold text-lg" style={{ color: 'rgba(255,255,255,0.9)' }}>הישגים</h3>
+            <Trophy size={16} style={{ color: 'var(--accent-warm)' }} />
+            <h3 className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>הישגים</h3>
           </div>
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 p-2.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <span className="text-2xl">🔥</span>
-              <div>
-                <p className="font-semibold stat-number" style={{ color: '#d4a843' }}>{streakDays} ימים ברצף</p>
-                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>רצף תיעוד</p>
+          <div className="space-y-3">
+            {[
+              { emoji: '🔥', value: `${streakDays} ימים ברצף`, label: 'רצף תיעוד', color: 'var(--accent-warm)' },
+              { emoji: '📉', value: `${totalLost > 0 ? totalLost.toFixed(1) : '0'} ק"ג`, label: 'סה"כ ירדת', color: '#34d399' },
+              { emoji: '💪', value: `${exercises.length} אימונים`, label: 'סה"כ', color: 'var(--accent)' },
+            ].map((a, i) => (
+              <div key={i} className="flex items-center gap-3 p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.015)' }}>
+                <span className="text-lg">{a.emoji}</span>
+                <div>
+                  <p className="text-sm font-medium" style={{ color: a.color }}>{a.value}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{a.label}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-3 p-2.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <span className="text-2xl">📉</span>
-              <div>
-                <p className="font-semibold stat-number" style={{ color: '#34d399' }}>{totalLost > 0 ? totalLost.toFixed(1) : '0'} ק&quot;ג</p>
-                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>סה&quot;כ ירדת</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-2.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <span className="text-2xl">💪</span>
-              <div>
-                <p className="font-semibold stat-number" style={{ color: '#a78bfa' }}>{exercises.length} אימונים</p>
-                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>סה&quot;כ</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '600ms' }}>
+        {/* Weigh-in countdown */}
+        <div className="card-static p-5 enter" style={{ animationDelay: '440ms' }}>
           <div className="flex items-center gap-2 mb-4">
-            <div className="p-1.5 rounded-lg" style={{ background: 'rgba(34, 197, 94, 0.15)' }}>
-              <TrendingDown className="text-emerald-400" size={20} />
-            </div>
-            <h3 className="font-bold text-lg" style={{ color: 'rgba(255,255,255,0.9)' }}>יום שקילה</h3>
+            <TrendingDown size={16} style={{ color: '#34d399' }} />
+            <h3 className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>יום שקילה</h3>
           </div>
-          <div className="text-center">
+          <div className="text-center pt-2">
             {(() => {
               const now = new Date();
               const daysUntilFriday = (5 - now.getDay() + 7) % 7;
@@ -306,23 +269,23 @@ export default function Dashboard() {
                 const todayWeight = weights.find(w => w.date === today);
                 return todayWeight ? (
                   <>
-                    <p className="text-4xl mb-2">✅</p>
-                    <p className="text-xl font-bold text-emerald-400">נשקלת היום!</p>
-                    <p className="text-2xl font-bold gold-text mt-1">{todayWeight.weight} ק&quot;ג</p>
+                    <p className="text-3xl mb-1">✅</p>
+                    <p className="font-medium text-emerald-400">נשקלת היום</p>
+                    <p className="text-xl font-semibold text-gradient mt-1">{todayWeight.weight} ק&quot;ג</p>
                   </>
                 ) : (
                   <>
-                    <p className="text-4xl mb-2">⚖️</p>
-                    <p className="text-xl font-bold" style={{ color: '#d4a843' }}>היום יום שישי!</p>
-                    <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>הגיע הזמן להישקל</p>
+                    <p className="text-3xl mb-1">⚖️</p>
+                    <p className="font-medium" style={{ color: 'var(--accent-warm)' }}>היום יום שישי</p>
+                    <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>הגיע הזמן להישקל</p>
                   </>
                 );
               }
               return (
                 <>
-                  <p className="text-5xl font-bold stat-number mb-2" style={{ color: '#8b5cf6' }}>{daysUntilFriday}</p>
-                  <p style={{ color: 'rgba(255,255,255,0.6)' }}>ימים עד השקילה הבאה</p>
-                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>(יום שישי)</p>
+                  <p className="text-4xl font-semibold mb-1" style={{ color: 'var(--accent)' }}>{daysUntilFriday}</p>
+                  <p style={{ color: 'var(--text-secondary)' }}>ימים עד השקילה</p>
+                  <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>יום שישי</p>
                 </>
               );
             })()}
@@ -330,31 +293,30 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Leaderboard */}
       {leaderboard.length > 1 && (
-        <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '650ms' }}>
+        <div className="card-static p-5 enter" style={{ animationDelay: '480ms' }}>
           <Link href="/competition" className="flex items-center gap-2 mb-4 group">
-            <div className="p-1.5 rounded-lg" style={{ background: 'rgba(234, 179, 8, 0.15)' }}>
-              <Crown className="text-yellow-400" size={20} />
-            </div>
-            <h3 className="font-bold text-lg" style={{ color: 'rgba(255,255,255,0.9)' }}>טבלת מובילים</h3>
-            <span className="text-sm mr-auto group-hover:text-purple-400 transition-colors" style={{ color: 'rgba(255,255,255,0.3)' }}>→ לטבלה המלאה</span>
+            <Crown size={16} style={{ color: 'var(--accent-warm)' }} />
+            <h3 className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>טבלת מובילים</h3>
+            <span className="text-xs mr-auto group-hover:text-purple-400 transition-colors" style={{ color: 'var(--text-tertiary)' }}>הצג הכל →</span>
           </Link>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {leaderboard.slice(0, 5).map((entry, i) => {
               const medals = ['🥇', '🥈', '🥉'];
               return (
-                <div key={i} className="flex items-center gap-3 p-2 rounded-xl transition-all" style={{ background: i === 0 ? 'rgba(212, 168, 67, 0.05)' : 'transparent' }}>
-                  <span className="text-lg w-8 text-center">{medals[i] || `${i + 1}.`}</span>
+                <div key={i} className="flex items-center gap-3 p-1.5 rounded-lg">
+                  <span className="text-sm w-6 text-center">{medals[i] || `${i + 1}`}</span>
                   {entry.avatar.startsWith('data:') ? (
-                    <img src={entry.avatar} alt="" className="w-8 h-8 rounded-full object-cover" style={{ border: '2px solid rgba(139, 92, 246, 0.3)' }} />
+                    <img src={entry.avatar} alt="" className="w-7 h-7 rounded-full object-cover" style={{ border: '1.5px solid var(--border-subtle)' }} />
                   ) : (
-                    <span className="text-xl w-8 text-center">{entry.avatar}</span>
+                    <span className="text-base w-7 text-center">{entry.avatar}</span>
                   )}
-                  <span className="font-medium flex-1" style={{ color: 'rgba(255,255,255,0.8)' }}>{entry.name}</span>
-                  <div className="w-24 rounded-full h-2" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                    <div className="h-2 rounded-full" style={{ width: `${entry.pct}%`, background: 'linear-gradient(90deg, #8b5cf6, #d4a843)' }} />
+                  <span className="text-sm flex-1" style={{ color: 'var(--text-secondary)' }}>{entry.name}</span>
+                  <div className="w-20 progress-bar h-1.5">
+                    <div className="progress-fill h-1.5" style={{ width: `${entry.pct}%`, background: 'linear-gradient(90deg, var(--accent), var(--accent-warm))' }} />
                   </div>
-                  <span className="text-sm font-bold w-12 text-left gold-text">{entry.pct}%</span>
+                  <span className="text-xs font-medium w-10 text-left text-gradient">{entry.pct}%</span>
                 </div>
               );
             })}
@@ -362,43 +324,23 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <QuickAction title="יומן יומי" description="צפה בשבוע שלך" href="/daily" icon={<Scale size={22} />} gradient="from-indigo-600 to-purple-600" delay={700} />
-        <QuickAction title="הוסף ארוחה" description="תעד מה אכלת היום" href="/food" icon={<UtensilsCrossed size={22} />} gradient="from-emerald-600 to-teal-600" delay={750} />
-        <QuickAction title="הוסף אימון" description="תעד את האימון שלך" href="/exercise" icon={<Dumbbell size={22} />} gradient="from-purple-600 to-pink-600" delay={800} />
-        <QuickAction title="טבלת תחרות" description="מי מוביל?" href="/competition" icon={<Trophy size={22} />} gradient="from-amber-600 to-yellow-500" delay={850} />
+      {/* Quick actions */}
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { title: 'יומן יומי', desc: 'צפה בשבוע שלך', href: '/daily', icon: <Scale size={20} />, colors: 'from-indigo-600/80 to-purple-700/80', delay: 520 },
+          { title: 'הוסף ארוחה', desc: 'תעד מה אכלת', href: '/food', icon: <UtensilsCrossed size={20} />, colors: 'from-emerald-600/80 to-teal-700/80', delay: 560 },
+          { title: 'הוסף אימון', desc: 'תעד את האימון', href: '/exercise', icon: <Dumbbell size={20} />, colors: 'from-purple-600/80 to-pink-700/80', delay: 600 },
+          { title: 'תחרות', desc: 'מי מוביל?', href: '/competition', icon: <Trophy size={20} />, colors: 'from-amber-600/80 to-yellow-700/80', delay: 640 },
+        ].map((a, i) => (
+          <Link key={i} href={a.href} className="card card-interactive flex items-center gap-3 p-4 enter" style={{ animationDelay: `${a.delay}ms` }}>
+            <div className={`bg-gradient-to-br ${a.colors} text-white p-2.5 rounded-xl`}>{a.icon}</div>
+            <div>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{a.title}</p>
+              <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{a.desc}</p>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
-  );
-}
-
-function StatCard({ icon, iconBg, title, value, subtitle, subtitleColor, href, delay }: {
-  icon: React.ReactNode; iconBg: string; title: string; value: string; subtitle: string; subtitleColor?: string; href: string; delay: number;
-}) {
-  return (
-    <Link href={href} className="glass-card p-5 block animate-slide-up" style={{ animationDelay: `${delay}ms` }}>
-      <div className="flex items-center gap-3 mb-2">
-        <div className="p-1.5 rounded-lg" style={{ background: iconBg }}>
-          {icon}
-        </div>
-        <span className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>{title}</span>
-      </div>
-      <p className="text-2xl font-bold stat-number" style={{ color: 'rgba(255,255,255,0.95)' }}>{value}</p>
-      {subtitle && <p className="text-sm mt-1" style={{ color: subtitleColor || 'rgba(255,255,255,0.4)' }}>{subtitle}</p>}
-    </Link>
-  );
-}
-
-function QuickAction({ title, description, href, icon, gradient, delay }: {
-  title: string; description: string; href: string; icon: React.ReactNode; gradient: string; delay: number;
-}) {
-  return (
-    <Link href={href} className="glass-card flex items-center gap-4 p-5 animate-slide-up" style={{ animationDelay: `${delay}ms` }}>
-      <div className={`bg-gradient-to-br ${gradient} text-white p-3 rounded-xl shadow-lg`}>{icon}</div>
-      <div>
-        <p className="font-semibold" style={{ color: 'rgba(255,255,255,0.9)' }}>{title}</p>
-        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>{description}</p>
-      </div>
-    </Link>
   );
 }

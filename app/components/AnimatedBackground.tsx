@@ -3,187 +3,140 @@
 export default function AnimatedBackground() {
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-      {/* Large spinning gradient ring */}
-      <div className="spin-360" style={{
+      {/* Soft ambient glow - top right */}
+      <div style={{
+        position: 'absolute',
+        width: '600px',
+        height: '600px',
+        top: '-15%',
+        right: '-10%',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(120, 80, 200, 0.08) 0%, transparent 70%)',
+        animation: 'ambient-drift 30s ease-in-out infinite',
+      }} />
+
+      {/* Soft ambient glow - bottom left */}
+      <div style={{
         position: 'absolute',
         width: '500px',
         height: '500px',
-        top: '-80px',
-        right: '-80px',
+        bottom: '-10%',
+        left: '-8%',
         borderRadius: '50%',
-        border: '2px solid transparent',
-        borderTopColor: 'rgba(139, 92, 246, 0.4)',
-        borderRightColor: 'rgba(212, 168, 67, 0.2)',
+        background: 'radial-gradient(circle, rgba(180, 140, 60, 0.06) 0%, transparent 70%)',
+        animation: 'ambient-drift 35s ease-in-out infinite reverse',
       }} />
 
-      {/* Second ring - reverse direction */}
-      <div className="spin-reverse" style={{
+      {/* Elegant spinning arc - top right */}
+      <svg viewBox="0 0 200 200" style={{
         position: 'absolute',
-        width: '400px',
-        height: '400px',
+        width: '420px',
+        height: '420px',
+        top: '-60px',
+        right: '-60px',
+        animation: 'spin-smooth 45s linear infinite',
+        opacity: 0.5,
+      }}>
+        <defs>
+          <linearGradient id="arc1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#d4a843" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <circle cx="100" cy="100" r="90" fill="none" stroke="url(#arc1)" strokeWidth="0.5"
+          strokeDasharray="120 450" strokeLinecap="round" />
+      </svg>
+
+      {/* Second arc - opposite direction */}
+      <svg viewBox="0 0 200 200" style={{
+        position: 'absolute',
+        width: '360px',
+        height: '360px',
         top: '-30px',
         right: '-30px',
-        borderRadius: '50%',
-        border: '1px dashed rgba(212, 168, 67, 0.3)',
-      }} />
+        animation: 'spin-smooth 55s linear infinite reverse',
+        opacity: 0.35,
+      }}>
+        <defs>
+          <linearGradient id="arc2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#d4a843" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <circle cx="100" cy="100" r="85" fill="none" stroke="url(#arc2)" strokeWidth="0.5"
+          strokeDasharray="80 450" strokeLinecap="round" />
+      </svg>
 
-      {/* Bottom left spinning ring */}
-      <div className="spin-360-slow" style={{
+      {/* Orbiting dot on top-right arc */}
+      <div style={{
         position: 'absolute',
-        width: '600px',
-        height: '600px',
-        bottom: '-150px',
-        left: '-150px',
-        borderRadius: '50%',
-        border: '2px solid transparent',
-        borderBottomColor: 'rgba(45, 212, 191, 0.3)',
-        borderLeftColor: 'rgba(139, 92, 246, 0.15)',
-      }} />
+        width: '420px',
+        height: '420px',
+        top: '-60px',
+        right: '-60px',
+        animation: 'spin-smooth 45s linear infinite',
+      }}>
+        <div style={{
+          position: 'absolute',
+          width: '4px',
+          height: '4px',
+          background: '#d4a843',
+          borderRadius: '50%',
+          top: '12px',
+          left: '50%',
+          boxShadow: '0 0 12px 3px rgba(212, 168, 67, 0.4)',
+        }} />
+      </div>
 
-      <div className="spin-reverse-slow" style={{
-        position: 'absolute',
-        width: '450px',
-        height: '450px',
-        bottom: '-75px',
-        left: '-75px',
-        borderRadius: '50%',
-        border: '1px dashed rgba(45, 212, 191, 0.2)',
-      }} />
-
-      {/* Center decorative spinning element */}
-      <div className="spin-360" style={{
-        position: 'absolute',
-        width: '300px',
-        height: '300px',
-        top: '50%',
-        left: '50%',
-        marginTop: '-150px',
-        marginLeft: '-150px',
-        borderRadius: '50%',
-        border: '1px solid transparent',
-        borderTopColor: 'rgba(212, 168, 67, 0.15)',
-        borderBottomColor: 'rgba(139, 92, 246, 0.15)',
-      }} />
-
-      {/* Orbiting dots on the large ring */}
-      <div className="spin-360" style={{
+      {/* Bottom left spinning arc */}
+      <svg viewBox="0 0 200 200" style={{
         position: 'absolute',
         width: '500px',
         height: '500px',
-        top: '-80px',
-        right: '-80px',
+        bottom: '-120px',
+        left: '-120px',
+        animation: 'spin-smooth 50s linear infinite',
+        opacity: 0.4,
+      }}>
+        <defs>
+          <linearGradient id="arc3" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#2dd4bf" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <circle cx="100" cy="100" r="92" fill="none" stroke="url(#arc3)" strokeWidth="0.5"
+          strokeDasharray="100 470" strokeLinecap="round" />
+      </svg>
+
+      {/* Orbiting dot on bottom-left arc */}
+      <div style={{
+        position: 'absolute',
+        width: '500px',
+        height: '500px',
+        bottom: '-120px',
+        left: '-120px',
+        animation: 'spin-smooth 50s linear infinite',
       }}>
         <div style={{
           position: 'absolute',
-          width: '8px',
-          height: '8px',
-          background: 'radial-gradient(circle, #d4a843, transparent)',
+          width: '3px',
+          height: '3px',
+          background: '#2dd4bf',
           borderRadius: '50%',
-          top: '0',
+          top: '6px',
           left: '50%',
-          marginLeft: '-4px',
-          boxShadow: '0 0 15px rgba(212, 168, 67, 0.6)',
-        }} />
-        <div style={{
-          position: 'absolute',
-          width: '6px',
-          height: '6px',
-          background: 'radial-gradient(circle, #8b5cf6, transparent)',
-          borderRadius: '50%',
-          bottom: '0',
-          left: '50%',
-          marginLeft: '-3px',
-          boxShadow: '0 0 12px rgba(139, 92, 246, 0.6)',
+          boxShadow: '0 0 10px 2px rgba(45, 212, 191, 0.35)',
         }} />
       </div>
 
-      {/* Orbiting dots on the bottom ring */}
-      <div className="spin-360-slow" style={{
+      {/* Very subtle grain overlay */}
+      <div style={{
         position: 'absolute',
-        width: '600px',
-        height: '600px',
-        bottom: '-150px',
-        left: '-150px',
-      }}>
-        <div style={{
-          position: 'absolute',
-          width: '6px',
-          height: '6px',
-          background: 'radial-gradient(circle, #2dd4bf, transparent)',
-          borderRadius: '50%',
-          top: '0',
-          left: '50%',
-          marginLeft: '-3px',
-          boxShadow: '0 0 12px rgba(45, 212, 191, 0.6)',
-        }} />
-        <div style={{
-          position: 'absolute',
-          width: '8px',
-          height: '8px',
-          background: 'radial-gradient(circle, #8b5cf6, transparent)',
-          borderRadius: '50%',
-          left: '0',
-          top: '50%',
-          marginTop: '-4px',
-          boxShadow: '0 0 15px rgba(139, 92, 246, 0.5)',
-        }} />
-      </div>
-
-      {/* Floating glowing orbs */}
-      <div className="float-orb" style={{
-        position: 'absolute',
-        width: '200px',
-        height: '200px',
-        top: '20%',
-        right: '15%',
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(139, 92, 246, 0.12), transparent 70%)',
-        filter: 'blur(40px)',
-      }} />
-      <div className="float-orb-reverse" style={{
-        position: 'absolute',
-        width: '250px',
-        height: '250px',
-        bottom: '20%',
-        left: '10%',
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(212, 168, 67, 0.08), transparent 70%)',
-        filter: 'blur(40px)',
-      }} />
-
-      {/* Small spinning diamond shapes */}
-      <div className="spin-360" style={{
-        position: 'absolute',
-        width: '20px',
-        height: '20px',
-        top: '30%',
-        right: '25%',
-        background: 'linear-gradient(135deg, rgba(212, 168, 67, 0.3), rgba(139, 92, 246, 0.3))',
-        transform: 'rotate(45deg)',
-        borderRadius: '3px',
-        boxShadow: '0 0 20px rgba(212, 168, 67, 0.2)',
-      }} />
-      <div className="spin-reverse" style={{
-        position: 'absolute',
-        width: '14px',
-        height: '14px',
-        top: '60%',
-        left: '30%',
-        background: 'linear-gradient(135deg, rgba(45, 212, 191, 0.25), rgba(139, 92, 246, 0.25))',
-        transform: 'rotate(45deg)',
-        borderRadius: '2px',
-        boxShadow: '0 0 15px rgba(45, 212, 191, 0.2)',
-      }} />
-      <div className="spin-360-slow" style={{
-        position: 'absolute',
-        width: '16px',
-        height: '16px',
-        bottom: '35%',
-        right: '35%',
-        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(212, 168, 67, 0.15))',
-        transform: 'rotate(45deg)',
-        borderRadius: '2px',
-        boxShadow: '0 0 18px rgba(139, 92, 246, 0.2)',
+        inset: 0,
+        opacity: 0.015,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+        backgroundRepeat: 'repeat',
+        backgroundSize: '128px 128px',
       }} />
     </div>
   );
