@@ -73,19 +73,6 @@ export default function SyncStatus() {
         )}
         {syncing ? 'מסנכרן...' : lastSync ? `מסונכרן ${lastSync}` : 'סנכרן'}
       </button>
-      <button
-        onClick={signOut}
-        className="flex items-center gap-1 px-2 py-1.5 rounded-full text-xs shadow-lg transition-all duration-300"
-        style={{
-          background: 'rgba(239, 68, 68, 0.1)',
-          border: '1px solid rgba(239, 68, 68, 0.2)',
-          color: '#f87171',
-          backdropFilter: 'blur(10px)',
-        }}
-        title="התנתק"
-      >
-        <LogOut size={12} />
-      </button>
     </div>
   );
 }

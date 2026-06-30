@@ -19,8 +19,11 @@ import {
   Trophy,
   Heart,
   Crown,
+  LogIn,
+  LogOut,
 } from 'lucide-react';
 import ProfileSwitcher from './ProfileSwitcher';
+import { useAuth } from '../lib/auth-context';
 
 const navItems = [
   { href: '/', label: 'דשבורד', icon: Home },
@@ -40,6 +43,7 @@ const navItems = [
 export default function Navigation() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   return (
     <>
@@ -112,6 +116,36 @@ export default function Navigation() {
               );
             })}
           </ul>
+
+          <div className="mt-6 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            {user ? (
+              <div>
+                <p className="text-xs truncate mb-2 px-3" style={{ color: 'rgba(255,255,255,0.3)' }}>{user.email}</p>
+                <button
+                  onClick={signOut}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm w-full group"
+                  style={{ color: 'rgba(255,255,255,0.5)', border: '1px solid transparent' }}
+                >
+                  <LogOut size={17} className="group-hover:text-red-400 transition-colors" />
+                  <span className="group-hover:text-white transition-colors">התנתק</span>
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm group"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(212, 168, 67, 0.1))',
+                  border: '1px solid rgba(139, 92, 246, 0.2)',
+                  color: '#d4a843',
+                }}
+              >
+                <LogIn size={17} />
+                <span>התחבר לסנכרון</span>
+              </Link>
+            )}
+          </div>
         </div>
       </nav>
 
