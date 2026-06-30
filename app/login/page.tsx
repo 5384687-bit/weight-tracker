@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '../lib/auth-context';
 import { pushToCloud, pullFromCloud } from '../lib/sync';
-import { LogIn, UserPlus, Scale, Loader2 } from 'lucide-react';
+import { LogIn, UserPlus, Crown, Loader2, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -28,7 +28,6 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
-      // After registration, push local data to cloud
       setSyncMessage('מעלה נתונים...');
       await pushToCloud();
     } else {
@@ -38,7 +37,6 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
-      // First push any existing local data to cloud, then pull
       setSyncMessage('מעלה נתונים מקומיים...');
       await pushToCloud();
       setSyncMessage('מוריד נתונים מהענן...');
@@ -50,29 +48,44 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4" dir="rtl">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-orbs" dir="rtl"
+      style={{ background: 'linear-gradient(135deg, #1e1b4b, #0f172a, #0a0a1a)' }}>
+
+      <div className="rotating-ring" style={{ width: '500px', height: '500px', top: '-50px', right: '-100px' }} />
+      <div className="rotating-ring-reverse" style={{ width: '700px', height: '700px', bottom: '-150px', left: '-150px' }} />
+
+      <div className="glass-card-static w-full max-w-md p-8 relative z-10 animate-slide-up">
         <div className="text-center mb-8">
-          <Scale className="mx-auto text-green-600 mb-3" size={48} />
-          <h1 className="text-3xl font-bold text-gray-800">מעקב משקל</h1>
-          <p className="text-gray-500 mt-1">הדרך לגרסה הטובה שלך</p>
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
+            style={{
+              background: 'linear-gradient(135deg, rgba(212, 168, 67, 0.2), rgba(139, 92, 246, 0.2))',
+              border: '1px solid rgba(212, 168, 67, 0.3)',
+            }}>
+            <Crown size={32} className="text-yellow-400" />
+          </div>
+          <h1 className="text-3xl font-bold gold-text">מעקב משקל</h1>
+          <p className="mt-1 flex items-center justify-center gap-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            <Sparkles size={14} className="text-purple-400" />
+            <span>הדרך לגרסה הטובה שלך</span>
+            <Sparkles size={14} className="text-purple-400" />
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">אימייל</label>
+            <label className="block text-sm font-medium mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>אימייל</label>
             <input
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="name@example.com"
               required
-              className="border rounded-lg px-4 py-3 w-full text-gray-800 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              className="rounded-xl px-4 py-3 w-full"
               dir="ltr"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">סיסמה</label>
+            <label className="block text-sm font-medium mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>סיסמה</label>
             <input
               type="password"
               value={password}
@@ -80,19 +93,19 @@ export default function LoginPage() {
               placeholder="לפחות 6 תווים"
               required
               minLength={6}
-              className="border rounded-lg px-4 py-3 w-full text-gray-800 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              className="rounded-xl px-4 py-3 w-full"
               dir="ltr"
             />
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+            <div className="rounded-xl p-3 text-sm" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#f87171' }}>
               {error}
             </div>
           )}
 
           {syncMessage && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700 flex items-center gap-2">
+            <div className="rounded-xl p-3 text-sm flex items-center gap-2" style={{ background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)', color: '#a78bfa' }}>
               <Loader2 className="animate-spin" size={16} />
               {syncMessage}
             </div>
@@ -101,7 +114,12 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+              color: 'white',
+              boxShadow: '0 4px 20px rgba(139, 92, 246, 0.3)',
+            }}
           >
             {loading ? (
               <Loader2 className="animate-spin" size={20} />
@@ -116,13 +134,14 @@ export default function LoginPage() {
         <div className="mt-6 text-center">
           <button
             onClick={() => { setIsRegister(!isRegister); setError(''); }}
-            className="text-green-600 hover:text-green-700 text-sm font-medium"
+            className="text-sm font-medium transition-colors"
+            style={{ color: '#d4a843' }}
           >
             {isRegister ? 'כבר יש לך חשבון? היכנס' : 'אין לך חשבון? הירשם'}
           </button>
         </div>
 
-        <p className="text-xs text-gray-400 text-center mt-4">
+        <p className="text-xs text-center mt-4" style={{ color: 'rgba(255,255,255,0.25)' }}>
           הנתונים שלך מסונכרנים בענן ונגישים מכל מכשיר
         </p>
       </div>

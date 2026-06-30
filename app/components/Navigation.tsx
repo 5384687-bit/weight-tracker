@@ -18,6 +18,7 @@ import {
   Ruler,
   Trophy,
   Heart,
+  Crown,
 } from 'lucide-react';
 import ProfileSwitcher from './ProfileSwitcher';
 
@@ -44,52 +45,80 @@ export default function Navigation() {
     <>
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="md:hidden fixed top-4 right-4 z-50 bg-blue-600 text-white p-2 rounded-lg shadow-lg"
+        className="md:hidden fixed top-4 right-4 z-50 p-2.5 rounded-xl shadow-lg transition-all duration-300"
+        style={{
+          background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+          boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
+        }}
       >
-        {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+        {mobileOpen ? <X size={22} className="text-white" /> : <Menu size={22} className="text-white" />}
       </button>
 
       <nav
-        className={`fixed top-0 right-0 h-full bg-gradient-to-b from-blue-900 to-blue-800 text-white w-64 p-6 z-40 transition-transform duration-300 overflow-y-auto ${
+        className={`fixed top-0 right-0 h-full nav-premium w-64 z-40 transition-transform duration-300 overflow-y-auto ${
           mobileOpen ? 'translate-x-0' : 'translate-x-full'
         } md:translate-x-0`}
       >
-        <div className="mb-4 text-center">
-          <Scale className="mx-auto mb-2" size={36} />
-          <h1 className="text-lg font-bold">מעקב משקל</h1>
-        </div>
+        <div className="p-6">
+          <div className="mb-6 text-center relative">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-3 relative"
+              style={{
+                background: 'linear-gradient(135deg, rgba(212, 168, 67, 0.2), rgba(139, 92, 246, 0.2))',
+                border: '1px solid rgba(212, 168, 67, 0.3)',
+              }}
+            >
+              <Crown size={28} className="text-yellow-400" />
+              <div className="absolute inset-0 rounded-2xl" style={{
+                border: '1px solid transparent',
+                borderImage: 'linear-gradient(135deg, rgba(212, 168, 67, 0.5), rgba(139, 92, 246, 0.5)) 1',
+              }} />
+            </div>
+            <h1 className="text-lg font-bold gold-text">מעקב משקל</h1>
+            <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Premium Edition</p>
+          </div>
 
-        <div className="mb-4">
-          <ProfileSwitcher />
-        </div>
+          <div className="mb-5">
+            <ProfileSwitcher />
+          </div>
 
-        <ul className="space-y-1">
-          {navItems.map(item => {
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm ${
-                    isActive
-                      ? 'bg-white/20 text-white font-semibold'
-                      : 'text-blue-100 hover:bg-white/10'
-                  }`}
-                >
-                  <Icon size={18} />
-                  <span>{item.label}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+          <ul className="space-y-1">
+            {navItems.map((item, index) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
+              return (
+                <li key={item.href} className="animate-slide-up" style={{ animationDelay: `${index * 30}ms` }}>
+                  <Link
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm relative group"
+                    style={isActive ? {
+                      background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(212, 168, 67, 0.1))',
+                      border: '1px solid rgba(139, 92, 246, 0.25)',
+                      color: '#e8e6f0',
+                      fontWeight: 600,
+                    } : {
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      border: '1px solid transparent',
+                    }}
+                  >
+                    {isActive && (
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-6 rounded-full"
+                        style={{ background: 'linear-gradient(180deg, #d4a843, #8b5cf6)' }} />
+                    )}
+                    <Icon size={17} style={isActive ? { color: '#d4a843' } : {}} className="group-hover:text-purple-400 transition-colors" />
+                    <span className="group-hover:text-white transition-colors">{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </nav>
 
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          className="fixed inset-0 z-30 md:hidden"
+          style={{ background: 'rgba(0, 0, 0, 0.7)', backdropFilter: 'blur(4px)' }}
           onClick={() => setMobileOpen(false)}
         />
       )}

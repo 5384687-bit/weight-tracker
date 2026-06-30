@@ -21,11 +21,11 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#16a34a",
+  themeColor: "#0a0a1a",
 };
 
 export const metadata: Metadata = {
-  title: "מעקב משקל - הדרך לגרסה הטובה שלך",
+  title: "מעקב משקל - Premium",
   description: "אפליקציה למעקב משקל, תזונה וכושר",
   manifest: "/manifest.json",
   appleWebApp: {
@@ -42,12 +42,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="he" dir="rtl" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex">
+      <body className="min-h-full flex bg-orbs">
+        <div className="rotating-ring" style={{ width: '600px', height: '600px', top: '-100px', left: '-100px' }} />
+        <div className="rotating-ring-reverse" style={{ width: '800px', height: '800px', bottom: '-200px', right: '-200px' }} />
+        <div className="rotating-ring" style={{ width: '400px', height: '400px', top: '50%', left: '50%', marginTop: '-200px', marginLeft: '-200px' }} />
         <AuthProvider>
           <AuthGuard>
             <Navigation />
             <SyncStatus />
-            <main className="flex-1 md:mr-64 p-4 md:p-8">{children}</main>
+            <main className="flex-1 md:mr-64 p-4 md:p-8 relative z-10">{children}</main>
           </AuthGuard>
         </AuthProvider>
       </body>

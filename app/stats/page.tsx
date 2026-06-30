@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BarChart3, Ruler, LineChart as LineChartIcon, BarChart2, TrendingUp, CandlestickChart as CandlestickIcon } from 'lucide-react';
+import { BarChart3, Ruler, LineChart as LineChartIcon, BarChart2, TrendingUp, CandlestickChart as CandlestickIcon, Calendar } from 'lucide-react';
 import { getWeightEntries, getFoodEntries, getExerciseEntries, getMeasurementEntries, getActiveProfile, getActiveProfileId } from '../lib/storage';
 import { WeightEntry, FoodEntry, ExerciseEntry, MeasurementEntry } from '../lib/types';
 import {
@@ -12,6 +12,31 @@ import { toHebrewDate } from '../lib/hebrew-date';
 import Link from 'next/link';
 
 type ChartType = 'line' | 'bar' | 'area' | 'candle';
+type TimeRange = '7d' | '14d' | '30d' | '90d' | '180d' | '365d' | 'all';
+
+const timeRangeOptions: { value: TimeRange; label: string }[] = [
+  { value: '7d', label: 'שבוע' },
+  { value: '14d', label: '2 שבועות' },
+  { value: '30d', label: 'חודש' },
+  { value: '90d', label: '3 חודשים' },
+  { value: '180d', label: 'חצי שנה' },
+  { value: '365d', label: 'שנה' },
+  { value: 'all', label: 'הכל' },
+];
+
+function getTimeRangeDays(range: TimeRange): number | null {
+  if (range === 'all') return null;
+  return parseInt(range);
+}
+
+function filterByTimeRange<T extends { date: string }>(entries: T[], range: TimeRange): T[] {
+  const days = getTimeRangeDays(range);
+  if (!days) return entries;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  const cutoffStr = cutoff.toISOString().split('T')[0];
+  return entries.filter(e => e.date >= cutoffStr);
+}
 
 const dayNamesShort: Record<number, string> = { 0: 'א׳', 1: 'ב׳', 2: 'ג׳', 3: 'ד׳', 4: 'ה׳', 5: 'ו׳', 6: 'ש׳' };
 function chartDate(dateStr: string): string {
@@ -29,12 +54,44 @@ const chartTypeLabels: Record<ChartType, { label: string; icon: React.ReactNode 
   candle: { label: 'נרות', icon: <CandlestickIcon size={14} /> },
 };
 
+function TimeRangePicker({ value, onChange }: { value: TimeRange; onChange: (v: TimeRange) => void }) {
+  return (
+    <div className="flex items-center gap-1 flex-wrap">
+      <Calendar size={14} style={{ color: 'rgba(255,255,255,0.3)' }} className="ml-1" />
+      {timeRangeOptions.map(opt => (
+        <button key={opt.value} onClick={() => onChange(opt.value)}
+          className="px-2.5 py-1 rounded-lg text-xs transition-all duration-200"
+          style={value === opt.value ? {
+            background: 'linear-gradient(135deg, rgba(212, 168, 67, 0.2), rgba(139, 92, 246, 0.2))',
+            border: '1px solid rgba(212, 168, 67, 0.3)',
+            color: '#d4a843',
+          } : {
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            color: 'rgba(255,255,255,0.4)',
+          }}>
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function ChartTypePicker({ value, onChange }: { value: ChartType; onChange: (v: ChartType) => void }) {
   return (
     <div className="flex gap-1">
       {(Object.keys(chartTypeLabels) as ChartType[]).map(t => (
         <button key={t} onClick={() => onChange(t)}
-          className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs transition-colors ${value === t ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs transition-all duration-200"
+          style={value === t ? {
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(139, 92, 246, 0.15))',
+            border: '1px solid rgba(139, 92, 246, 0.3)',
+            color: '#a78bfa',
+          } : {
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            color: 'rgba(255,255,255,0.4)',
+          }}>
           {chartTypeLabels[t].icon} {chartTypeLabels[t].label}
         </button>
       ))}
@@ -89,8 +146,9 @@ function FlexChart({ type, data, dataKeys, colors, names, height = 300, yDomain,
             if (!payload?.[0]) return null;
             const d = payload[0].payload;
             return (
-              <div className="bg-white border rounded-lg p-2.5 shadow text-sm" dir="rtl">
-                <p className="font-bold mb-1">{label}</p>
+              <div className="rounded-xl p-2.5 shadow-xl text-sm" dir="rtl"
+                style={{ background: 'rgba(15,15,35,0.95)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
+                <p className="font-bold mb-1 gold-text">{label}</p>
                 {dataKeys.map((k, i) => {
                   const o = d[`${k}_open`]; const c = d[`${k}_close`];
                   const h = d[`${k}_high`]; const l = d[`${k}_low`];
@@ -98,8 +156,8 @@ function FlexChart({ type, data, dataKeys, colors, names, height = 300, yDomain,
                   return (
                     <div key={k} className="mb-1" style={{ color: colors[i] }}>
                       <p className="font-medium">{names[i]}</p>
-                      <p className="text-gray-600">פתיחה: {o} | סגירה: {c}</p>
-                      <p className="text-gray-600">גבוה: {h} | נמוך: {l}</p>
+                      <p style={{ color: 'rgba(255,255,255,0.5)' }}>פתיחה: {o} | סגירה: {c}</p>
+                      <p style={{ color: 'rgba(255,255,255,0.5)' }}>גבוה: {h} | נמוך: {l}</p>
                     </div>
                   );
                 })}
@@ -116,7 +174,7 @@ function FlexChart({ type, data, dataKeys, colors, names, height = 300, yDomain,
               low: (d[`${k}_low`] ?? 0) as number,
             }))} color={colors[i]} />
           ))}
-          {referenceLine && <ReferenceLine y={referenceLine.y} stroke="#22c55e" strokeDasharray="5 5" label={referenceLine.label} />}
+          {referenceLine && <ReferenceLine y={referenceLine.y} stroke="#d4a843" strokeDasharray="5 5" label={referenceLine.label} />}
         </ComposedChart>
       </ResponsiveContainer>
     );
@@ -132,7 +190,7 @@ function FlexChart({ type, data, dataKeys, colors, names, height = 300, yDomain,
           {dataKeys.map((k, i) => (
             <Bar key={k} dataKey={k} fill={colors[i]} name={names[i]} radius={[4, 4, 0, 0]} />
           ))}
-          {referenceLine && <ReferenceLine y={referenceLine.y} stroke="#22c55e" strokeDasharray="5 5" label={referenceLine.label} />}
+          {referenceLine && <ReferenceLine y={referenceLine.y} stroke="#d4a843" strokeDasharray="5 5" label={referenceLine.label} />}
         </BarChart>
       </ResponsiveContainer>
     );
@@ -146,9 +204,9 @@ function FlexChart({ type, data, dataKeys, colors, names, height = 300, yDomain,
           <YAxis domain={yDomain as never} />
           <Tooltip />
           {dataKeys.map((k, i) => (
-            <Area key={k} type="monotone" dataKey={k} stroke={colors[i]} fill={colors[i]} fillOpacity={0.2} strokeWidth={2} name={names[i]} />
+            <Area key={k} type="monotone" dataKey={k} stroke={colors[i]} fill={colors[i]} fillOpacity={0.15} strokeWidth={2} name={names[i]} />
           ))}
-          {referenceLine && <ReferenceLine y={referenceLine.y} stroke="#22c55e" strokeDasharray="5 5" label={referenceLine.label} />}
+          {referenceLine && <ReferenceLine y={referenceLine.y} stroke="#d4a843" strokeDasharray="5 5" label={referenceLine.label} />}
         </AreaChart>
       </ResponsiveContainer>
     );
@@ -161,9 +219,9 @@ function FlexChart({ type, data, dataKeys, colors, names, height = 300, yDomain,
         <YAxis domain={yDomain as never} />
         <Tooltip />
         {dataKeys.map((k, i) => (
-          <Line key={k} type="monotone" dataKey={k} stroke={colors[i]} strokeWidth={2} name={names[i]} dot={{ r: 3 }} connectNulls />
+          <Line key={k} type="monotone" dataKey={k} stroke={colors[i]} strokeWidth={2} name={names[i]} dot={{ r: 3, fill: colors[i] }} connectNulls />
         ))}
-        {referenceLine && <ReferenceLine y={referenceLine.y} stroke="#22c55e" strokeDasharray="5 5" label={referenceLine.label} />}
+        {referenceLine && <ReferenceLine y={referenceLine.y} stroke="#d4a843" strokeDasharray="5 5" label={referenceLine.label} />}
       </LineChart>
     </ResponsiveContainer>
   );
@@ -193,7 +251,7 @@ function CandlestickLayer({ data, color: fixedColor }: { data: OHLCData[]; color
         const lowY = yScale(d.low) ?? 0;
 
         const isDown = d.close < d.open;
-        const color = fixedColor || (isDown ? '#22c55e' : d.close > d.open ? '#ef4444' : '#6b7280');
+        const color = fixedColor || (isDown ? '#34d399' : d.close > d.open ? '#f87171' : '#6b7280');
         const bodyTop = Math.min(openY, closeY);
         const bodyH = Math.max(Math.abs(openY - closeY), 2);
         const barW = 18;
@@ -229,12 +287,13 @@ function CandleChart({ data, height = 300, referenceLine }: {
           const d = payload[0].payload as OHLCData;
           const isDown = d.close < d.open;
           return (
-            <div className="bg-white border rounded-lg p-2.5 shadow text-sm" dir="rtl">
-              <p className="font-bold mb-1">{label}</p>
-              <p>פתיחה: {d.open} ק&quot;ג</p>
-              <p>גבוה: {d.high} ק&quot;ג</p>
-              <p>נמוך: {d.low} ק&quot;ג</p>
-              <p className={isDown ? 'text-green-600 font-semibold' : d.close > d.open ? 'text-red-500 font-semibold' : ''}>
+            <div className="rounded-xl p-2.5 shadow-xl text-sm" dir="rtl"
+              style={{ background: 'rgba(15,15,35,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <p className="font-bold mb-1 gold-text">{label}</p>
+              <p style={{ color: 'rgba(255,255,255,0.6)' }}>פתיחה: {d.open} ק&quot;ג</p>
+              <p style={{ color: 'rgba(255,255,255,0.6)' }}>גבוה: {d.high} ק&quot;ג</p>
+              <p style={{ color: 'rgba(255,255,255,0.6)' }}>נמוך: {d.low} ק&quot;ג</p>
+              <p style={{ color: isDown ? '#34d399' : d.close > d.open ? '#f87171' : 'rgba(255,255,255,0.6)', fontWeight: 600 }}>
                 סגירה: {d.close} ק&quot;ג
               </p>
             </div>
@@ -242,7 +301,7 @@ function CandleChart({ data, height = 300, referenceLine }: {
         }} />
         <Bar dataKey="high" fill="transparent" isAnimationActive={false} />
         <CandlestickLayer data={data} />
-        {referenceLine && <ReferenceLine y={referenceLine.y} stroke="#22c55e" strokeDasharray="5 5" label={referenceLine.label} />}
+        {referenceLine && <ReferenceLine y={referenceLine.y} stroke="#d4a843" strokeDasharray="5 5" label={referenceLine.label} />}
       </ComposedChart>
     </ResponsiveContainer>
   );
@@ -279,6 +338,7 @@ export default function StatsPage() {
   const [targetWeight, setTargetWeight] = useState<number | null>(null);
   const [startWeight, setStartWeight] = useState<number | null>(null);
   const [profileId, setProfileId] = useState<string | null>(null);
+  const [timeRange, setTimeRange] = useState<TimeRange>('30d');
 
   const loadChart = (key: string, def: ChartType): ChartType => {
     if (typeof window === 'undefined') return def;
@@ -318,29 +378,37 @@ export default function StatsPage() {
   if (!profileId) {
     return (
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3 mb-6"><BarChart3 className="text-orange-500" /> סטטיסטיקות</h1>
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 text-center">
-          <p className="text-yellow-800 text-lg mb-3">צור פרופיל קודם</p>
-          <Link href="/profiles" className="inline-block bg-yellow-500 text-white px-6 py-2 rounded-lg hover:bg-yellow-600">צור פרופיל</Link>
+        <h1 className="text-3xl font-bold flex items-center gap-3 mb-6" style={{ color: 'rgba(255,255,255,0.9)' }}>
+          <BarChart3 className="text-orange-400" /> סטטיסטיקות
+        </h1>
+        <div className="glass-card p-8 text-center">
+          <p className="text-lg mb-3" style={{ color: '#d4a843' }}>צור פרופיל קודם</p>
+          <Link href="/profiles" className="inline-block btn-gold px-6 py-2.5 rounded-xl">צור פרופיל</Link>
         </div>
       </div>
     );
   }
 
-  const sortedWeights = [...weights].sort((a, b) => a.date.localeCompare(b.date));
+  const filteredWeights = filterByTimeRange(weights, timeRange);
+  const filteredFoods = filterByTimeRange(foods, timeRange);
+  const filteredExercises = filterByTimeRange(exercises, timeRange);
+  const filteredMeasurements = filterByTimeRange(measurements, timeRange);
+
+  const sortedWeights = [...filteredWeights].sort((a, b) => a.date.localeCompare(b.date));
   const weightChartData = sortedWeights.map(e => ({
     date: chartDate(e.date),
     weight: e.weight,
   }));
 
-  const last30Days = Array.from({ length: 30 }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() - (29 - i));
+  const days = getTimeRangeDays(timeRange) || 365;
+  const dateRange = Array.from({ length: days }, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() - (days - 1 - i));
     return d.toISOString().split('T')[0];
   });
 
-  const calorieData = last30Days.map(date => {
-    const dayFoods = foods.filter(f => f.date === date);
-    const dayExercises = exercises.filter(e => e.date === date);
+  const calorieData = dateRange.map(date => {
+    const dayFoods = filteredFoods.filter(f => f.date === date);
+    const dayExercises = filteredExercises.filter(e => e.date === date);
     return {
       date: chartDate(date),
       consumed: dayFoods.reduce((s, f) => s + (f.calories || 0), 0),
@@ -348,9 +416,9 @@ export default function StatsPage() {
     };
   }).filter(d => d.consumed > 0 || d.burned > 0);
 
-  const exerciseData = last30Days.map(date => ({
+  const exerciseData = dateRange.map(date => ({
     date: chartDate(date),
-    minutes: exercises.filter(e => e.date === date).reduce((s, e) => s + e.duration, 0),
+    minutes: filteredExercises.filter(e => e.date === date).reduce((s, e) => s + e.duration, 0),
   })).filter(d => d.minutes > 0);
 
   const weeklyWeightData = (() => {
@@ -379,7 +447,7 @@ export default function StatsPage() {
   })();
 
   const measurementChartData = (() => {
-    const sorted = [...measurements].sort((a, b) => a.date.localeCompare(b.date));
+    const sorted = [...filteredMeasurements].sort((a, b) => a.date.localeCompare(b.date));
     return sorted.map(m => ({
       date: chartDate(m.date),
       waist: m.waist || null,
@@ -390,45 +458,54 @@ export default function StatsPage() {
     }));
   })();
 
-  const totalExerciseMinutes = exercises.reduce((s, e) => s + e.duration, 0);
-  const uniqueFoodDays = new Set(foods.map(f => f.date)).size;
+  const totalExerciseMinutes = filteredExercises.reduce((s, e) => s + e.duration, 0);
+  const uniqueFoodDays = new Set(filteredFoods.map(f => f.date)).size;
   const avgDailyCalories = uniqueFoodDays > 0
-    ? Math.round(foods.reduce((s, f) => s + (f.calories || 0), 0) / uniqueFoodDays) : 0;
+    ? Math.round(filteredFoods.reduce((s, f) => s + (f.calories || 0), 0) / uniqueFoodDays) : 0;
   const weightLost = sortedWeights.length >= 2
     ? sortedWeights[0].weight - sortedWeights[sortedWeights.length - 1].weight : 0;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-        <BarChart3 className="text-orange-500" /> סטטיסטיקות וגרפים
-      </h1>
+      <div className="flex items-center justify-between flex-wrap gap-4 animate-slide-up">
+        <h1 className="text-3xl font-bold flex items-center gap-3">
+          <div className="p-2 rounded-xl" style={{ background: 'rgba(249, 115, 22, 0.15)' }}>
+            <BarChart3 className="text-orange-400" size={24} />
+          </div>
+          <span style={{ color: 'rgba(255,255,255,0.9)' }}>סטטיסטיקות וגרפים</span>
+        </h1>
+      </div>
+
+      <div className="glass-card-static p-3 animate-slide-up" style={{ animationDelay: '50ms' }}>
+        <TimeRangePicker value={timeRange} onChange={setTimeRange} />
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl shadow-sm p-5 border text-center">
-          <p className="text-sm text-gray-500">{"סה\"כ דקות אימון"}</p>
-          <p className="text-3xl font-bold text-purple-600">{totalExerciseMinutes}</p>
+        <div className="glass-card-static p-5 text-center animate-slide-up" style={{ animationDelay: '100ms' }}>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>{"סה\"כ דקות אימון"}</p>
+          <p className="text-3xl font-bold stat-number" style={{ color: '#a78bfa' }}>{totalExerciseMinutes}</p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-5 border text-center">
-          <p className="text-sm text-gray-500">ממוצע קלוריות יומי</p>
-          <p className="text-3xl font-bold text-orange-600">{avgDailyCalories}</p>
+        <div className="glass-card-static p-5 text-center animate-slide-up" style={{ animationDelay: '150ms' }}>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>ממוצע קלוריות יומי</p>
+          <p className="text-3xl font-bold stat-number" style={{ color: '#fb923c' }}>{avgDailyCalories}</p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-5 border text-center">
-          <p className="text-sm text-gray-500">ירידה כוללת</p>
-          <p className={`text-3xl font-bold ${weightLost > 0 ? 'text-green-600' : 'text-gray-600'}`}>
+        <div className="glass-card-static p-5 text-center animate-slide-up" style={{ animationDelay: '200ms' }}>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>ירידה כוללת</p>
+          <p className={`text-3xl font-bold stat-number ${weightLost > 0 ? 'text-emerald-400' : ''}`} style={weightLost <= 0 ? { color: 'rgba(255,255,255,0.5)' } : {}}>
             {weightLost > 0 ? weightLost.toFixed(1) : '0'} {"ק\"ג"}
           </p>
         </div>
       </div>
 
       {weightChartData.length > 1 && (
-        <div className="bg-white rounded-xl shadow-sm p-6 border">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-lg">מגמת משקל</h2>
+        <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '250ms' }}>
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h2 className="font-bold text-lg" style={{ color: 'rgba(255,255,255,0.9)' }}>מגמת משקל</h2>
             <ChartTypePicker value={weightChartType} onChange={setWeightChartType} />
           </div>
           {weightChartType === 'candle' ? (
             <CandleChart
-              data={weightToOHLC(weights)}
+              data={weightToOHLC(filteredWeights)}
               referenceLine={targetWeight ? { y: targetWeight, label: `יעד: ${targetWeight}` } : undefined}
             />
           ) : (
@@ -436,7 +513,7 @@ export default function StatsPage() {
               type={weightChartType}
               data={weightChartData}
               dataKeys={['weight']}
-              colors={['#3b82f6']}
+              colors={['#8b5cf6']}
               names={['משקל (ק"ג)']}
               yDomain={['dataMin - 2', 'dataMax + 2']}
               referenceLine={targetWeight ? { y: targetWeight, label: `יעד: ${targetWeight}` } : undefined}
@@ -446,32 +523,32 @@ export default function StatsPage() {
       )}
 
       {calorieData.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm p-6 border">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-lg">קלוריות - צריכה מול שריפה</h2>
+        <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '300ms' }}>
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h2 className="font-bold text-lg" style={{ color: 'rgba(255,255,255,0.9)' }}>קלוריות - צריכה מול שריפה</h2>
             <ChartTypePicker value={calorieChartType} onChange={setCalorieChartType} />
           </div>
           <FlexChart
             type={calorieChartType}
             data={calorieData}
             dataKeys={['consumed', 'burned']}
-            colors={['#f97316', '#22c55e']}
+            colors={['#fb923c', '#34d399']}
             names={['צריכה', 'שריפה']}
           />
         </div>
       )}
 
       {exerciseData.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm p-6 border">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-lg">דקות אימון ביום</h2>
+        <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '350ms' }}>
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h2 className="font-bold text-lg" style={{ color: 'rgba(255,255,255,0.9)' }}>דקות אימון ביום</h2>
             <ChartTypePicker value={exerciseChartType} onChange={setExerciseChartType} />
           </div>
           <FlexChart
             type={exerciseChartType}
             data={exerciseData}
             dataKeys={['minutes']}
-            colors={['#a855f7']}
+            colors={['#a78bfa']}
             names={['דקות']}
             height={250}
           />
@@ -479,19 +556,19 @@ export default function StatsPage() {
       )}
 
       {weeklyWeightData.length > 1 && (
-        <div className="bg-white rounded-xl shadow-sm p-6 border">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-lg">ירידה שבועית במשקל</h2>
+        <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '400ms' }}>
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h2 className="font-bold text-lg" style={{ color: 'rgba(255,255,255,0.9)' }}>ירידה שבועית במשקל</h2>
             <ChartTypePicker value={weeklyChartType} onChange={setWeeklyChartType} />
           </div>
           {weeklyChartType === 'candle' ? (
-            <CandleChart data={weightToOHLC(weights)} />
+            <CandleChart data={weightToOHLC(filteredWeights)} />
           ) : (
             <FlexChart
               type={weeklyChartType}
               data={weeklyWeightData}
               dataKeys={['weeklyChange', 'totalFromStart']}
-              colors={['#ef4444', '#22c55e']}
+              colors={['#f87171', '#34d399']}
               names={['שינוי שבועי (ק"ג)', 'סה"כ מההתחלה (ק"ג)']}
               xKey="week"
             />
@@ -500,27 +577,29 @@ export default function StatsPage() {
       )}
 
       {weeklyWeightData.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm p-6 border">
-          <h2 className="font-bold text-lg mb-4">טבלת משקל שבועית</h2>
+        <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '450ms' }}>
+          <h2 className="font-bold text-lg mb-4" style={{ color: 'rgba(255,255,255,0.9)' }}>טבלת משקל שבועית</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b-2 border-gray-200">
-                  <th className="text-right py-2 px-3 font-semibold text-gray-700">שבוע</th>
-                  <th className="text-center py-2 px-3 font-semibold text-gray-700">{"משקל ממוצע (ק\"ג)"}</th>
-                  <th className="text-center py-2 px-3 font-semibold text-gray-700">{"שינוי שבועי (ק\"ג)"}</th>
-                  <th className="text-center py-2 px-3 font-semibold text-gray-700">{"סה\"כ מההתחלה (ק\"ג)"}</th>
+                <tr style={{ borderBottom: '2px solid rgba(255,255,255,0.1)' }}>
+                  <th className="text-right py-2 px-3 font-semibold" style={{ color: 'rgba(255,255,255,0.5)' }}>שבוע</th>
+                  <th className="text-center py-2 px-3 font-semibold" style={{ color: 'rgba(255,255,255,0.5)' }}>{"משקל ממוצע (ק\"ג)"}</th>
+                  <th className="text-center py-2 px-3 font-semibold" style={{ color: 'rgba(255,255,255,0.5)' }}>{"שינוי שבועי (ק\"ג)"}</th>
+                  <th className="text-center py-2 px-3 font-semibold" style={{ color: 'rgba(255,255,255,0.5)' }}>{"סה\"כ מההתחלה (ק\"ג)"}</th>
                 </tr>
               </thead>
               <tbody>
                 {weeklyWeightData.map((row, i) => (
-                  <tr key={i} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-2.5 px-3 font-medium">{row.week}</td>
-                    <td className="py-2.5 px-3 text-center font-bold text-gray-800">{row.avgWeight}</td>
-                    <td className={`py-2.5 px-3 text-center font-semibold ${row.weeklyChange < 0 ? 'text-green-600' : row.weeklyChange > 0 ? 'text-red-500' : 'text-gray-400'}`}>
+                  <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }} className="hover:bg-white/[0.02]">
+                    <td className="py-2.5 px-3 font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>{row.week}</td>
+                    <td className="py-2.5 px-3 text-center font-bold gold-text">{row.avgWeight}</td>
+                    <td className={`py-2.5 px-3 text-center font-semibold ${row.weeklyChange < 0 ? 'text-emerald-400' : row.weeklyChange > 0 ? 'text-red-400' : ''}`}
+                      style={row.weeklyChange === 0 ? { color: 'rgba(255,255,255,0.3)' } : {}}>
                       {row.weeklyChange === 0 ? '-' : `${row.weeklyChange > 0 ? '+' : ''}${row.weeklyChange}`}
                     </td>
-                    <td className={`py-2.5 px-3 text-center font-semibold ${row.totalFromStart > 0 ? 'text-green-600' : row.totalFromStart < 0 ? 'text-red-500' : 'text-gray-400'}`}>
+                    <td className={`py-2.5 px-3 text-center font-semibold ${row.totalFromStart > 0 ? 'text-emerald-400' : row.totalFromStart < 0 ? 'text-red-400' : ''}`}
+                      style={row.totalFromStart === 0 ? { color: 'rgba(255,255,255,0.3)' } : {}}>
                       {row.totalFromStart > 0 ? `-${row.totalFromStart}` : row.totalFromStart < 0 ? `+${Math.abs(row.totalFromStart)}` : '-'}
                     </td>
                   </tr>
@@ -532,10 +611,10 @@ export default function StatsPage() {
       )}
 
       {measurementChartData.length > 1 && (
-        <div className="bg-white rounded-xl shadow-sm p-6 border">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-lg flex items-center gap-2">
-              <Ruler className="text-pink-500" size={20} /> מגמת היקפים
+        <div className="glass-card-static p-6 animate-slide-up" style={{ animationDelay: '500ms' }}>
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h2 className="font-bold text-lg flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.9)' }}>
+              <Ruler className="text-pink-400" size={20} /> מגמת היקפים
             </h2>
             <ChartTypePicker value={measureChartType} onChange={setMeasureChartType} />
           </div>
@@ -543,17 +622,17 @@ export default function StatsPage() {
             type={measureChartType}
             data={measurementChartData}
             dataKeys={['waist', 'chest', 'hips', 'armRight', 'thighRight']}
-            colors={['#ef4444', '#3b82f6', '#a855f7', '#f97316', '#22c55e']}
+            colors={['#f87171', '#60a5fa', '#a78bfa', '#fb923c', '#34d399']}
             names={['מותניים', 'חזה', 'ירכיים', 'זרוע', 'ירך']}
           />
         </div>
       )}
 
       {weights.length === 0 && foods.length === 0 && exercises.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          <BarChart3 size={48} className="mx-auto mb-4 text-gray-300" />
-          <p className="text-lg">אין עדיין נתונים להציג</p>
-          <p className="text-sm">התחל לתעד משקל, תזונה ואימונים כדי לראות את הסטטיסטיקות שלך</p>
+        <div className="text-center py-12">
+          <BarChart3 size={48} className="mx-auto mb-4" style={{ color: 'rgba(255,255,255,0.15)' }} />
+          <p className="text-lg" style={{ color: 'rgba(255,255,255,0.5)' }}>אין עדיין נתונים להציג</p>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>התחל לתעד משקל, תזונה ואימונים כדי לראות את הסטטיסטיקות שלך</p>
         </div>
       )}
     </div>

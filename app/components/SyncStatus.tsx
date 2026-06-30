@@ -23,14 +23,12 @@ export default function SyncStatus() {
     setSyncing(false);
   }, [user, syncing]);
 
-  // Auto-sync every 30 seconds when user is active
   useEffect(() => {
     if (!user) return;
     const interval = setInterval(handleSync, 30000);
     return () => clearInterval(interval);
   }, [user, handleSync]);
 
-  // Sync on page visibility change (when user comes back to tab)
   useEffect(() => {
     if (!user) return;
     const handler = () => {
@@ -47,13 +45,23 @@ export default function SyncStatus() {
       <button
         onClick={handleSync}
         disabled={syncing}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs shadow-lg transition-all ${
-          syncing
-            ? 'bg-blue-100 text-blue-700'
-            : lastSync
-            ? 'bg-green-100 text-green-700 hover:bg-green-200'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-        }`}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs shadow-lg transition-all duration-300"
+        style={syncing ? {
+          background: 'rgba(139, 92, 246, 0.15)',
+          border: '1px solid rgba(139, 92, 246, 0.25)',
+          color: '#a78bfa',
+          backdropFilter: 'blur(10px)',
+        } : lastSync ? {
+          background: 'rgba(34, 197, 94, 0.1)',
+          border: '1px solid rgba(34, 197, 94, 0.2)',
+          color: '#34d399',
+          backdropFilter: 'blur(10px)',
+        } : {
+          background: 'rgba(255, 255, 255, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          color: 'rgba(255, 255, 255, 0.5)',
+          backdropFilter: 'blur(10px)',
+        }}
         title={lastSync ? `סנכרון אחרון: ${lastSync}` : 'סנכרן לענן'}
       >
         {syncing ? (
@@ -67,7 +75,13 @@ export default function SyncStatus() {
       </button>
       <button
         onClick={signOut}
-        className="flex items-center gap-1 px-2 py-1.5 rounded-full text-xs bg-red-50 text-red-600 hover:bg-red-100 shadow-lg transition-all"
+        className="flex items-center gap-1 px-2 py-1.5 rounded-full text-xs shadow-lg transition-all duration-300"
+        style={{
+          background: 'rgba(239, 68, 68, 0.1)',
+          border: '1px solid rgba(239, 68, 68, 0.2)',
+          color: '#f87171',
+          backdropFilter: 'blur(10px)',
+        }}
         title="התנתק"
       >
         <LogOut size={12} />
