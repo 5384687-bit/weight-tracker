@@ -57,6 +57,26 @@ input[type="number"]::-webkit-outer-spin-button {
   50% { opacity: 0.6; filter: blur(80px); }
 }
 
+/* Visible 360 spinning elements */
+.spin-360 {
+  animation: rotate-360 20s linear infinite;
+}
+.spin-reverse {
+  animation: rotate-reverse 25s linear infinite;
+}
+.spin-360-slow {
+  animation: rotate-360 35s linear infinite;
+}
+.spin-reverse-slow {
+  animation: rotate-reverse 45s linear infinite;
+}
+.float-orb {
+  animation: float-orb 20s ease-in-out infinite;
+}
+.float-orb-reverse {
+  animation: float-orb 28s ease-in-out infinite reverse;
+}
+
 @keyframes shimmer {
   0% { background-position: -200% center; }
   100% { background-position: 200% center; }

@@ -5,6 +5,7 @@ import Navigation from "./components/Navigation";
 import { AuthProvider } from "./lib/auth-context";
 import AuthGuard from "./components/AuthGuard";
 import SyncStatus from "./components/SyncStatus";
+import AnimatedBackground from "./components/AnimatedBackground";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,10 +43,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="he" dir="rtl" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex bg-orbs">
-        <div className="rotating-ring" style={{ width: '600px', height: '600px', top: '-100px', left: '-100px' }} />
-        <div className="rotating-ring-reverse" style={{ width: '800px', height: '800px', bottom: '-200px', right: '-200px' }} />
-        <div className="rotating-ring" style={{ width: '400px', height: '400px', top: '50%', left: '50%', marginTop: '-200px', marginLeft: '-200px' }} />
+      <body className="min-h-full flex">
+        <AnimatedBackground />
         <AuthProvider>
           <AuthGuard>
             <Navigation />
